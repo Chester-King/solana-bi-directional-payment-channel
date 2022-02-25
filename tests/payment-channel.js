@@ -36,9 +36,10 @@ describe('payment-channel', () => {
       }
     );
     await console.log("Your transaction signature", tx);
-    const account = await program.account.dataAccount.fetch(
+    let account = await program.account.dataAccount.fetch(
       dataAccount.publicKey
     );
+    await console.log(account)
     let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
     let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
     await console.log(v1," - ",v2);
@@ -61,9 +62,31 @@ describe('payment-channel', () => {
     v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
     v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
     await console.log(v1," - ",v2);
-      
+    
   });
 
 
+  it('Is initialized!', async () => {
+    const program = await anchor.workspace.PaymentChannel;
+    const tx = await program.rpc.transferSol(
+      {
+        accounts: {
+          dataAccount : dataAccount.publicKey,
+          signer : provider.wallet.publicKey,
+          systemProgram : anchor.web3.SystemProgram.programId
+        },
+        
+      }
+    );
+
+    let account = await program.account.dataAccount.fetch(
+      dataAccount.publicKey
+    );
+    await console.log(account)
+    v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
+    v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
+    await console.log(v1," - ",v2);
+
+  });
 
 });
