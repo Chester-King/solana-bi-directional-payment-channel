@@ -1,6 +1,14 @@
 const assert = require("assert");
 const anchor = require("@project-serum/anchor");
-const { SystemProgram } = anchor.web3;
+const { 
+  Connection,
+  TransactionInstruction,
+  Transaction,
+  sendAndConfirmTransaction,
+  PublicKey,
+  SystemProgram
+
+} = anchor.web3;
 var BigNumber = require('big-number');
 
 describe('payment-channel', () => {
@@ -31,6 +39,31 @@ describe('payment-channel', () => {
     const account = await program.account.dataAccount.fetch(
       dataAccount.publicKey
     );
-    await console.log(account);
+    let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
+    let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
+    await console.log(v1," - ",v2);
+    const lamports = 5000000000;
+    await console.log(lamports);
+    
+    let transaction = new Transaction();
+
+    // Add an instruction to execute
+    transaction.add(SystemProgram.transfer({
+        fromPubkey: provider.wallet.publicKey,
+        toPubkey: dataAccount.publicKey,
+        lamports: lamports,
+    }));
+    await console.log(typeof provider.wallet);
+    await console.log(provider.wallet.payer._keypair.secretKey);
+    await sendAndConfirmTransaction(anchor.getProvider().connection, transaction, [provider.wallet.payer])
+    
+    
+    v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
+    v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
+    await console.log(v1," - ",v2);
+      
   });
+
+
+
 });
