@@ -40,16 +40,19 @@ describe('payment-channel', () => {
         ]
       }
     );
-    await console.log("Your transaction signature", tx);
+    // await console.log("Your transaction signature", tx);
     let account = await program.account.dataAccount.fetch(
       dataAccount.publicKey
     );
-    await console.log(account)
+    // await console.log(account)
     let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
     let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
-    await console.log(v1," - ",v2);
+    // await console.log(v1," - ",v2);
+    await assert.ok(
+      v2<2004482240
+    );
     const lamports = 5000000000;
-    await console.log(lamports);
+    // await console.log(lamports);
     
     let transaction = new Transaction();
 
@@ -59,19 +62,24 @@ describe('payment-channel', () => {
         toPubkey: dataAccount.publicKey,
         lamports: lamports,
     }));
-    await console.log(typeof provider.wallet);
-    await console.log(provider.wallet.payer._keypair.secretKey);
+    // await console.log(typeof provider.wallet);
+    // await console.log(provider.wallet.payer._keypair.secretKey);
     await sendAndConfirmTransaction(anchor.getProvider().connection, transaction, [provider.wallet.payer])
     
     
     v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
     v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
-    await console.log(v1," - ",v2);
+    // await console.log(v1," - ",v2);
+    await assert.ok(
+      v2>5000000000
+    );
     let account2 = await program.account.proposalAccount.fetch(
       proposalAccount.publicKey
     );
-    await console.log(account2)
-    
+    // await console.log(account2)
+    await assert.ok(
+      !account2.vote1 && !account2.vote2
+    );
   });
 
   it('Updating Proposal', async () => {
@@ -95,16 +103,18 @@ describe('payment-channel', () => {
     let account = await program.account.dataAccount.fetch(
       dataAccount.publicKey
     );
-    await console.log(account)
+    // await console.log(account)
     let account2 = await program.account.proposalAccount.fetch(
       proposalAccount.publicKey
     );
-    await console.log(account2)
+    // await console.log(account2)
     let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
     let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
-    await console.log(v1," - ",v2);
+    // await console.log(v1," - ",v2);
 
-
+    await assert.ok(
+      account2.vote1 && !account2.vote2
+    );
 
   });
 
@@ -128,14 +138,17 @@ describe('payment-channel', () => {
     let account = await program.account.dataAccount.fetch(
       dataAccount.publicKey
     );
-    await console.log(account)
+    // await console.log(account)
     let account2 = await program.account.proposalAccount.fetch(
       proposalAccount.publicKey
     );
-    await console.log(account2)
+    // await console.log(account2)
     let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
     let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
-    await console.log(v1," - ",v2);
+    // await console.log(v1," - ",v2);
+    await assert.ok(
+      !account2.vote1 && !account2.vote2
+    );
   })
 
   it('Execute fail 1', async () => {
@@ -155,21 +168,25 @@ describe('payment-channel', () => {
           
         }
         );
-    }catch(error){
-      await console.log("Failed as expected");
+        await assert.ok(false);
+      }catch(error){
+      await assert.ok(true);
     }
    
     let account = await program.account.dataAccount.fetch(
       dataAccount.publicKey
     );
-    await console.log(account)
+    // await console.log(account)
     let account2 = await program.account.proposalAccount.fetch(
       proposalAccount.publicKey
     );
-    await console.log(account2)
+    // await console.log(account2)
     let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
     let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
-    await console.log(v1," - ",v2);
+    // await console.log(v1," - ",v2);
+    await assert.ok(
+      !account2.vote1 && !account2.vote2
+    );
   })
 
   it('Proposal Voting 2', async () => {
@@ -206,14 +223,17 @@ describe('payment-channel', () => {
     let account = await program.account.dataAccount.fetch(
       dataAccount.publicKey
     );
-    await console.log(account)
+    // await console.log(account)
     let account2 = await program.account.proposalAccount.fetch(
       proposalAccount.publicKey
     );
-    await console.log(account2)
+    // await console.log(account2)
     let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
     let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
-    await console.log(v1," - ",v2);
+    // await console.log(v1," - ",v2);
+    await assert.ok(
+      v2>5000000000
+    );
   })
 
   it('Execute 1', async () => {
@@ -240,14 +260,17 @@ describe('payment-channel', () => {
     let account = await program.account.dataAccount.fetch(
       dataAccount.publicKey
     );
-    await console.log(account)
+    // await console.log(account)
     let account2 = await program.account.proposalAccount.fetch(
       proposalAccount.publicKey
     );
-    await console.log(account2)
+    // await console.log(account2)
     let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
     let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
-    await console.log(v1," - ",v2);
+    // await console.log(v1," - ",v2);
+    await assert.ok(
+      v2>2000000000 && v2<5000000000
+    );
   })
   
   it('Execute 2', async () => {
@@ -274,14 +297,17 @@ describe('payment-channel', () => {
     let account = await program.account.dataAccount.fetch(
       dataAccount.publicKey
     );
-    await console.log(account)
+    // await console.log(account)
     let account2 = await program.account.proposalAccount.fetch(
       proposalAccount.publicKey
     );
-    await console.log(account2)
+    // await console.log(account2)
     let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
     let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
-    await console.log(v1," - ",v2);
+    // await console.log(v1," - ",v2);
+    await assert.ok(
+      v2<2004482240
+    );
   })
 
 
