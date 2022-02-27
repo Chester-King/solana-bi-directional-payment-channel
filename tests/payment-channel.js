@@ -17,21 +17,26 @@ describe('payment-channel', () => {
   anchor.setProvider(provider);
 
   const dataAccount = anchor.web3.Keypair.generate();
+  const proposalAccount = anchor.web3.Keypair.generate();
 
   it('Is initialized!', async () => {
     // Add your test here.
     const program = await anchor.workspace.PaymentChannel;
     const tx = await program.rpc.initialize(
       [provider.wallet.publicKey,provider.wallet.publicKey],
+      new anchor.BN(1648270221),
+      new anchor.BN(600),
       {
         accounts: {
           user : provider.wallet.publicKey,
           dataAccount : dataAccount.publicKey,
+          proposalAccount : proposalAccount.publicKey,
           systemProgram : anchor.web3.SystemProgram.programId
 
         },
         signers: [
-          dataAccount
+          dataAccount,
+          proposalAccount
         ]
       }
     );
@@ -62,16 +67,24 @@ describe('payment-channel', () => {
     v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
     v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
     await console.log(v1," - ",v2);
+    let account2 = await program.account.proposalAccount.fetch(
+      proposalAccount.publicKey
+    );
+    await console.log(account2)
     
   });
 
-
-  it('Is initialized!', async () => {
+  it('Updating Proposal', async () => {
     const program = await anchor.workspace.PaymentChannel;
-    const tx = await program.rpc.transferSol(
+      const tx = await program.rpc.proposalUpdate(
+        new anchor.BN(0),
+        new anchor.BN(1),
+        new anchor.BN(3000000000),
+        new anchor.BN(2000000000),
       {
         accounts: {
           dataAccount : dataAccount.publicKey,
+          proposalAccount : proposalAccount.publicKey,
           signer : provider.wallet.publicKey,
           systemProgram : anchor.web3.SystemProgram.programId
         },
@@ -83,10 +96,194 @@ describe('payment-channel', () => {
       dataAccount.publicKey
     );
     await console.log(account)
-    v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
-    v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
+    let account2 = await program.account.proposalAccount.fetch(
+      proposalAccount.publicKey
+    );
+    await console.log(account2)
+    let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
+    let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
     await console.log(v1," - ",v2);
 
+
+
   });
+
+  it('Proposal Voting 1', async () => {
+    const program = await anchor.workspace.PaymentChannel;
+      const tx = await program.rpc.proposalVote(
+        new anchor.BN(0),
+        new anchor.BN(1),
+        false,
+      {
+        accounts: {
+          dataAccount : dataAccount.publicKey,
+          proposalAccount : proposalAccount.publicKey,
+          signer : provider.wallet.publicKey,
+          systemProgram : anchor.web3.SystemProgram.programId
+        },
+        
+      }
+    );
+
+    let account = await program.account.dataAccount.fetch(
+      dataAccount.publicKey
+    );
+    await console.log(account)
+    let account2 = await program.account.proposalAccount.fetch(
+      proposalAccount.publicKey
+    );
+    await console.log(account2)
+    let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
+    let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
+    await console.log(v1," - ",v2);
+  })
+
+  it('Execute fail 1', async () => {
+    const program = await anchor.workspace.PaymentChannel;
+    try{
+
+      const tx = await program.rpc.executeProposal(
+        new anchor.BN(0),
+        new anchor.BN(1),
+        {
+          accounts: {
+            dataAccount : dataAccount.publicKey,
+            proposalAccount : proposalAccount.publicKey,
+            signer : provider.wallet.publicKey,
+            systemProgram : anchor.web3.SystemProgram.programId
+          },
+          
+        }
+        );
+    }catch(error){
+      await console.log("Failed as expected");
+    }
+   
+    let account = await program.account.dataAccount.fetch(
+      dataAccount.publicKey
+    );
+    await console.log(account)
+    let account2 = await program.account.proposalAccount.fetch(
+      proposalAccount.publicKey
+    );
+    await console.log(account2)
+    let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
+    let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
+    await console.log(v1," - ",v2);
+  })
+
+  it('Proposal Voting 2', async () => {
+    const program = await anchor.workspace.PaymentChannel;
+      const tx = await program.rpc.proposalVote(
+        new anchor.BN(0),
+        new anchor.BN(1),
+        true,
+      {
+        accounts: {
+          dataAccount : dataAccount.publicKey,
+          proposalAccount : proposalAccount.publicKey,
+          signer : provider.wallet.publicKey,
+          systemProgram : anchor.web3.SystemProgram.programId
+        },
+        
+      }
+    );
+      const tx2 = await program.rpc.proposalVote(
+        new anchor.BN(1),
+        new anchor.BN(1),
+        true,
+      {
+        accounts: {
+          dataAccount : dataAccount.publicKey,
+          proposalAccount : proposalAccount.publicKey,
+          signer : provider.wallet.publicKey,
+          systemProgram : anchor.web3.SystemProgram.programId
+        },
+        
+      }
+    );
+
+    let account = await program.account.dataAccount.fetch(
+      dataAccount.publicKey
+    );
+    await console.log(account)
+    let account2 = await program.account.proposalAccount.fetch(
+      proposalAccount.publicKey
+    );
+    await console.log(account2)
+    let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
+    let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
+    await console.log(v1," - ",v2);
+  })
+
+  it('Execute 1', async () => {
+    const program = await anchor.workspace.PaymentChannel;
+    
+
+    
+      const tx = await program.rpc.executeProposal(
+        new anchor.BN(0),
+        new anchor.BN(1),
+        true,
+        {
+          accounts: {
+            dataAccount : dataAccount.publicKey,
+            proposalAccount : proposalAccount.publicKey,
+            signer : provider.wallet.publicKey,
+            systemProgram : anchor.web3.SystemProgram.programId
+          },
+          
+        }
+        );
+    
+   
+    let account = await program.account.dataAccount.fetch(
+      dataAccount.publicKey
+    );
+    await console.log(account)
+    let account2 = await program.account.proposalAccount.fetch(
+      proposalAccount.publicKey
+    );
+    await console.log(account2)
+    let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
+    let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
+    await console.log(v1," - ",v2);
+  })
+  
+  it('Execute 2', async () => {
+    const program = await anchor.workspace.PaymentChannel;
+    
+
+    
+      const tx = await program.rpc.executeProposal(
+        new anchor.BN(1),
+        new anchor.BN(1),
+        true,
+        {
+          accounts: {
+            dataAccount : dataAccount.publicKey,
+            proposalAccount : proposalAccount.publicKey,
+            signer : provider.wallet.publicKey,
+            systemProgram : anchor.web3.SystemProgram.programId
+          },
+          
+        }
+        );
+    
+   
+    let account = await program.account.dataAccount.fetch(
+      dataAccount.publicKey
+    );
+    await console.log(account)
+    let account2 = await program.account.proposalAccount.fetch(
+      proposalAccount.publicKey
+    );
+    await console.log(account2)
+    let v1 = await anchor.getProvider().connection.getBalance(provider.wallet.publicKey);
+    let v2 = await anchor.getProvider().connection.getBalance(dataAccount.publicKey);
+    await console.log(v1," - ",v2);
+  })
+
+
 
 });
